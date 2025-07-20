@@ -3,7 +3,7 @@ import Link from "next/link";
 import { GiSelfLove } from "react-icons/gi";
 import { auth } from "@/auth";
 import UserMenu from "./UserMenu";
-// import { getUserInfoForNav } from "@/app/actions/userActions";
+import { getUserInfoForNav } from "@/app/actions/userActions";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -13,8 +13,8 @@ import NavLink from "./NavLink";
 
 export default async function TopNav() {
   const session = await auth();
-  // const userInfo =
-  //   session?.user && (await getUserInfoForNav());
+  const userInfo =
+    session?.user && (await getUserInfoForNav());
 
   const memberLinks = [
     { href: "/members", label: "Matches" },
@@ -59,8 +59,8 @@ export default async function TopNav() {
           {/* Right side - Auth buttons or user menu */}
           <div className="flex gap-2 items-center">
             {
-            session?.user ? (
-              <UserMenu user={session.user} />
+            userInfo ? (
+              <UserMenu user={userInfo} />
             ) : 
             (
               <>
