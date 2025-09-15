@@ -1,17 +1,37 @@
+import CardInnerWrapper from "@/components/CardInnerWrapper";
 import React from "react";
-import { CardHeader, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import ChatForm from "./ChatForm";
+import { getMessageThread } from "@/app/actions/messageActions";
+import { getAuthUserId } from "@/app/actions/authActions";
+import MessageList from "./MessageList";
+import { createChatId } from "@/lib/utils";
 
-export default function ChatPage() {
+export default async function ChatPage({
+  params,
+}: {
+  params: { userId: string };
+}) {
+  const messages = await getMessageThread(
+    params.userId
+  );
+  const userId = await getAuthUserId();
+
+  const chatId = createChatId(
+    userId,
+    params.userId
+  );
+
   return (
-    <>
-      <CardHeader className="text-2xl font-semibold">
-        Chat
-      </CardHeader>
-      <Separator />
-      <CardContent>
-        Chat goes here
-      </CardContent>
-    </>
+    <CardInnerWrapper
+      header="Chat"
+      body={
+        <MessageList
+          initialMessages={messages}
+          currentUserId={userId}
+          chatId={chatId}
+        />
+      }
+      footer={<ChatForm />}
+    />
   );
 }

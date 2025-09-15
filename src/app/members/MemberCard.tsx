@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 import LikeButton from "@/components/LikeButton";
+import PresenceDot from "@/components/PresenceDot";
 type Props = {
   member: Member;
   likeIds: string[];
@@ -38,6 +39,9 @@ export default function MemberCard({ member, likeIds }: Props) {
               targetId={member.userId}
               hasLiked={hasLiked}
             />
+          </div>
+          <div className="absolute top-2 left-3 z-50">
+            <PresenceDot member={member} />
           </div>
         </div>
         <CardFooter className="absolute bottom-0 z-10 bg-gradient-to-t from-black/70 to-transparent w-full p-4">

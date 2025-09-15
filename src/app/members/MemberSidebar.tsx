@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
+import PresenceDot from "@/components/PresenceDot";
 
 type Props = {
   member: Member;
@@ -19,7 +20,7 @@ export default function MemberSidebar({ member, navLinks }: Props) {
   const pathname = usePathname();
 
   return (
-    <Card className="w-full mt-10 h-[80vh] flex flex-col items-center">
+    <Card className="w-full mt-10 h-[80vh] min-h-[48rem] flex flex-col items-center">
       <div className="mt-6 relative w-40 h-40 rounded-full overflow-hidden">
         <Image
           src={member.image || "/images/user.png"}
@@ -29,9 +30,15 @@ export default function MemberSidebar({ member, navLinks }: Props) {
         />
       </div>
 
-      <CardContent className="flex flex-col items-center mt-4 px-6 text-center">
-        <div className="text-2xl font-semibold">
-          {member.name}, {calculateAge(member.dateOfBirth)}
+      <CardContent className="flex flex-col items-center mt-4 px-6 text-center overflow-hidden">
+        <div className="flex">
+          <div className="text-2xl">
+            {member.name},{" "}
+            {calculateAge(member.dateOfBirth)}
+          </div>
+          <div>
+            <PresenceDot member={member} />
+          </div>
         </div>
         <div className="text-sm text-muted-foreground">
           {member.city}, {member.country}

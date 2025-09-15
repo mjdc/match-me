@@ -1,6 +1,6 @@
 // components/NavLink.tsx
 "use client";
-
+import useMessageStore from "@/hooks/useMessageStore";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
@@ -19,6 +19,9 @@ export default function NavLink({
 }: NavLinkProps) {
   const pathname = usePathname();
   const isActive = pathname === href;
+  const unreadCount = useMessageStore(
+    (state) => (state.unreadCount)
+  );
 
   return (
     <NavigationMenuItem key={href}>
@@ -29,8 +32,13 @@ export default function NavLink({
             className
           )}
                     >
-                      <Link href={href}>
-                        {label}
+                      <Link href={href} className="flex flex-row">
+                        <span>{label}</span>
+                        {href === "/messages" && (
+                          <span className="ml-1">
+                            ({unreadCount})
+                          </span>
+                        )}
                       </Link>
                    </NavigationMenuLink>
     </NavigationMenuItem>

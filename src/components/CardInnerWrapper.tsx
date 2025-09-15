@@ -1,0 +1,33 @@
+import React, { ReactNode } from "react";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+type Props = {
+  header: ReactNode | string;
+  body: ReactNode;
+  footer?: ReactNode;
+};
+
+export default function CardInnerWrapper({ header, body, footer }: Props) {
+  return (
+    <>
+      <CardHeader>
+        {typeof header === "string" ? (
+          <CardTitle>{header}</CardTitle>
+        ) : (
+          <>{header}</>
+        )}
+      </CardHeader>
+      <Separator className="my-0" />
+      <CardContent>{body}</CardContent>
+
+      {footer && <CardFooter className="mt-auto">{footer}</CardFooter>}
+    </>
+  );
+}

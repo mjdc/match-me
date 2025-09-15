@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { differenceInYears } from 'date-fns';
+import { differenceInYears, format, formatDistance } from 'date-fns';
 import { FieldValues, Path, UseFormSetError } from 'react-hook-form';
 import { ZodIssue } from 'zod';
 
@@ -25,3 +25,24 @@ export function handleFormServerErrors<TFieldValues extends FieldValues>(
         setError('root.serverError', { message: errorResponse.error });
     }
 }
+
+export function formatShortDateTime(date: Date) {
+    return format(date, 'dd MMM yy h:mm:a')
+}
+
+export function truncateString(text?: string | null, num = 50) {
+    if (!text) return null;
+    if (text.length <= num) {
+        return text;
+    }
+    return text.slice(0, num) + '...';
+}
+
+export function createChatId(a: string, b: string) {
+    return a > b ? `${b}-${a}` : `${a}-${b}`
+}
+
+export function timeAgo(date: string) {
+    return formatDistance(new Date(date), new Date()) + ' ago';
+}
+
