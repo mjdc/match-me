@@ -1,16 +1,29 @@
-import { z } from "zod";
+import { z } from 'zod';
+import { calculateAge } from '../utils';
+
 export const registerSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(50, "Name must be at most 50 characters long"),
-  email: z
-    .string()
-    .email()
-    .min(1, "Email is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(128, "Password must be at most 128 characters long"),
+    name: z.string().min(3),
+    email: z.string().email(),
+    password: z.string().min(6, {
+        message: 'Password must be at least 6 characters'
+    })
+})
+
+export const profileSchema = z.object({
+    gender: z.string().min(1),
+    description: z.string().min(1),
+    city: z.string().min(1),
+    country: z.string().min(1),
+    dateOfBirth: z.string().min(1, {
+        message: 'Date of birth is required'
+    }).refine(dateString => {
+        const age = calculateAge(new Date(dateString));
+        return age >= 18;
+    }, {
+        message: 'You must be at least 18 to use this app'
+    }),
 });
-export type RegisterSchema = z.infer<typeof registerSchema>;
+
+export const combinedRegisterSchema = registerSchema.and(profileSchema);
+
+export type RegisterSchema = z.infer<typeof registerSchema & typeof profileSchema>

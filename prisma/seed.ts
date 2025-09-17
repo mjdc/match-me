@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { membersData } from './membersData';
+import { membersData } from './membersData.js';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -12,6 +12,7 @@ async function seedMembers() {
             name: member.name,
             passwordHash: await hash('password', 10),
             image: member.image,
+            profileComplete: true,
             member: {
                 create: {
                     dateOfBirth: new Date(member.dateOfBirth),

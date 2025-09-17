@@ -42,10 +42,10 @@ export default async function TopNav() {
             <UserMenu userInfo={userInfo} />
           ) : (
             <>
-              <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-pink-600">
+              <Button asChild variant="outline" className="border-white text-pink-600 hover:bg-white hover:text-pink-600">
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-pink-600">
+              <Button asChild variant="outline" className="border-white text-pink-600 hover:bg-white hover:text-pink-600">
                 <Link href="/register">Register</Link>
               </Button>
             </>

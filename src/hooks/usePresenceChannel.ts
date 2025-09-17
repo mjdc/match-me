@@ -4,11 +4,11 @@ import { Channel, Members } from 'pusher-js';
 import { pusherClient } from '@/lib/pusher';
 import { updateLastActive } from '@/app/actions/memberActions';
 
-export const usePresenceChannel = () => {
+export const usePresenceChannel = (userId: string | null) => {
     const set = usePresenceStore(state => state.set);
     const add = usePresenceStore(state => state.add);
     const remove = usePresenceStore(state => state.remove);
-
+    
     const channelRef = useRef<Channel | null>(null);
 
     const handleSetMembers = useCallback((memberIds: string[]) => {
@@ -24,6 +24,7 @@ export const usePresenceChannel = () => {
     }, [remove])
 
     useEffect(() => {
+        if (!userId) return;
         if (!channelRef.current) {
             channelRef.current = pusherClient.subscribe('presence-match-me');
 
@@ -49,5 +50,5 @@ export const usePresenceChannel = () => {
                 channelRef.current.unbind('pusher:member_removed', handleRemoveMember);
             }
         }
-    }, [handleAddMember, handleRemoveMember, handleSetMembers])
+    }, [handleAddMember, handleRemoveMember, handleSetMembers, userId])
 }

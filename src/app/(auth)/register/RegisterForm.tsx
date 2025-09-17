@@ -1,109 +1,141 @@
 "use client";
 
+import { registerUser } from "@/app/actions/authActions";
 import {
-  RegisterSchema,
+  profileSchema,
   registerSchema,
+  RegisterSchema,
 } from "@/lib/schemas/RegisterSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { handleFormServerErrors } from "@/lib/utils";
 import {
   Card,
   CardHeader,
-  CardContent,
   CardTitle,
   CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useState } from "react";
+import {
+  FormProvider,
+  useForm,
+} from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
-import { registerUser } from "@/app/actions/authActions";
+import UserDetailsForm from "./UserDetailsForm";
+import ProfileDetailsForm from "./ProfileDetailsForm";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { sendVerificationEmail } from "@/lib/mail";
+
+const stepSchemas = [registerSchema, profileSchema];
 
 export default function RegisterForm() {
+  const [activeStep, setActiveStep] = useState(0);
+  const currentValidationSchema =
+    stepSchemas[activeStep];
+
+  const registerFormMethods =
+    useForm<RegisterSchema>({
+      resolver: zodResolver(currentValidationSchema),
+      mode: "onTouched",
+    });
+
   const {
-    register,
     handleSubmit,
+    getValues,
     setError,
     formState: { errors, isValid, isSubmitting },
-  } = useForm<RegisterSchema>({
-    resolver: zodResolver(registerSchema),
-    mode: "onTouched",
-  });
+  } = registerFormMethods;
 
-  const onSubmit = async(data: RegisterSchema) => {
-    const result = await registerUser(data);
+  const router = useRouter();
+
+  const onSubmit = async () => {
+    const result = await registerUser(getValues());
     if (result.status === "success") {
-      // Handle successful registration, e.g., redirect or show a success message
-      console.log("Registration successful:", result.data);
+      router.push("/register/success");
     } else {
-      // Handle error, e.g., show an error message
-      if(Array.isArray(result.error)) {
-        result.error.forEach(err => {
-          console.error("Registration error:", err.message);
-          const fieldName = err.path.join(".") as |"email" | "password" | "name";
-          setError(fieldName, {
-            message: err.message,
-          })
-        });
-      } else {
-        console.error("Registration error:", result.error);
-      }
+      handleFormServerErrors(result, setError);
     }
   };
 
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return <UserDetailsForm />;
+      case 1:
+        return <ProfileDetailsForm />;
+      default:
+        return "Unknown step";
+    }
+  };
+
+  const onBack = () => {
+    setActiveStep((prev) => prev - 1);
+  };
+
+  const onNext = async () => {
+    if (activeStep === stepSchemas.length - 1) {
+      await onSubmit();
+    } else {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+
+  const testSend = async () => {
+    await sendVerificationEmail('a', 'b');
+  }
+
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="flex flex-col items-center text-center space-y-2">
-        <div className="flex items-center gap-3">
-          <GiPadlock size={30} />
-          <CardTitle className="text-3xl font-semibold">Register</CardTitle>
+    <Card className="w-3/5 mx-auto">
+      <CardHeader className="flex flex-col items-center justify-center">
+        <div className="flex flex-col gap-2 items-center text-foreground">
+          <div className="flex flex-row items-center gap-3">
+            <GiPadlock size={30} />
+            <CardTitle className="text-3xl font-semibold">
+              Register
+            </CardTitle>
+          </div>
+          <CardDescription>
+            Welcome to NextMatch
+          </CardDescription>
         </div>
-        <CardDescription className="text-neutral-500">
-          Welcome to NextMatch
-        </CardDescription>
       </CardHeader>
-
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Input
-              placeholder="Name"
-              {...register("name")}
-              className={errors.name ? "border-red-500" : ""}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-            )}
-          </div>
+        <FormProvider {...registerFormMethods}>
+          <form onSubmit={handleSubmit(onNext)}>
+            <div className="space-y-4 w-full">
+              {getStepContent(activeStep)}
 
-          <div>
-            <Input
-              placeholder="Email"
-              type="email"
-              {...register("email")}
-              className={errors.email ? "border-red-500" : ""}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
-            )}
-          </div>
+              {errors.root?.serverError && (
+                <p className="text-destructive text-sm">
+                  {errors.root.serverError.message}
+                </p>
+              )}
 
-          <div>
-            <Input
-              placeholder="Password"
-              type="password"
-              {...register("password")}
-              className={errors.password ? "border-red-500" : ""}
-            />
-            {errors.password && (
-              <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
-            )}
-          </div>
-
-          <Button type="submit" className="w-full" disabled={!isValid || isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Register"}
-          </Button>
-        </form>
+              <div className="w-full flex flex-row items-center gap-6">
+                {activeStep !== 0 && (
+                  <Button
+                    type="button"
+                    onClick={onBack}
+                    className="flex-grow"
+                    variant="secondary"
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button
+                  disabled={!isValid || isSubmitting}
+                  className="flex-grow"
+                  type="submit"
+                >
+                  {activeStep === stepSchemas.length - 1
+                    ? "Submit"
+                    : "Continue"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </FormProvider>
       </CardContent>
     </Card>
   );
