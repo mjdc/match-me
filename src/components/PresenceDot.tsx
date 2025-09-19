@@ -18,7 +18,7 @@ export default function PresenceDot({
   if (!isOnline) return null;
 
   return (
-    <>
+    <div className="relative">
       <GoDot
         size={36}
         className="fill-white absolute -top-[2px] -right-[2px]"
@@ -27,6 +27,6 @@ export default function PresenceDot({
         size={32}
         className="fill-green-500 animate-pulse"
       />
-    </>
+    </div>
   );
 }

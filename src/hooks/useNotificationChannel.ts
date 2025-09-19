@@ -6,12 +6,14 @@ import { useCallback, useEffect, useRef } from 'react'
 import useMessageStore from './useMessageStore';
 import { newLikeToast, newMessageToast } from '@/components/NotificationToast';
 
-export const useNotificationChannel = (userId: string | null) => {
+export const useNotificationChannel = (userId: string | null, profileComplete: boolean) => {
     const channelRef = useRef<Channel | null>(null);
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const add = useMessageStore((state) => state.add);
-    const updateUnreadCount = useMessageStore((state) => state.updateUnreadCount);
+    
+    const add = useMessageStore(state => state.add);
+    const updateUnreadCount = useMessageStore(state => state.updateUnreadCount);
+
 
     const handleNewMessage = useCallback((message: MessageDto) => {
         if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
@@ -28,7 +30,7 @@ export const useNotificationChannel = (userId: string | null) => {
     }, []);
 
     useEffect(() => {
-        if (!userId) return;
+        if (!userId || !profileComplete) return;
         if (!channelRef.current) {
             channelRef.current = pusherClient.subscribe(`private-${userId}`);
 
@@ -44,5 +46,5 @@ export const useNotificationChannel = (userId: string | null) => {
                 channelRef.current = null;
             }
         }
-    }, [userId, handleNewMessage])
+    }, [userId, handleNewMessage, profileComplete])
 }

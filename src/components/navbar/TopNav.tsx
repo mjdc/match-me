@@ -16,6 +16,25 @@ export default async function TopNav() {
   const session = await auth();
   const userInfo = session?.user && (await getUserInfoForNav());
 
+
+  const memberLinks = [
+    { href: "/members", label: "Matches" },
+    { href: "/lists", label: "Lists" },
+    { href: "/messages", label: "Messages" },
+  ];
+
+  const adminLinks = [
+    {
+      href: "/admin/moderation",
+      label: "Photo Moderation",
+    },
+  ];
+
+  const links =
+    session?.user.role === "ADMIN"
+      ? adminLinks
+      : memberLinks;
+
   return (
     <>
       <nav className="w-full bg-gradient-to-r from-pink-400 via-red-400 to-pink-600 px-6 py-3 flex items-center justify-between">
@@ -29,16 +48,21 @@ export default async function TopNav() {
         <div className="hidden md:flex gap-6">
           <NavigationMenu>
             <NavigationMenuList>
-              <NavLink href="/members" label="Matches" />
-              <NavLink href="/lists" label="Lists" />
-              <NavLink href="/messages" label="Messages" />
+              {links.map((item) => (
+                <NavLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                />
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
         {/* Auth / User */}
         <div className="flex items-center gap-3">
-          {userInfo ? (
+         {
+          userInfo ? (
             <UserMenu userInfo={userInfo} />
           ) : (
             <>

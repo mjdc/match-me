@@ -21,10 +21,11 @@ import { signInUser } from "@/app/actions/authActions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import SocialLogin from "./SocialLogin";
 
 export default function LoginForm() {
 const {register, handleSubmit, formState: { errors, isValid }} = useForm({
-    mode: "onBlur",
+    mode: "onChange",
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -58,7 +59,7 @@ const onSubmit = async(data: LoginSchema) => {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mb-4">
           <div>
             <Input
               type="email"
@@ -90,12 +91,14 @@ const onSubmit = async(data: LoginSchema) => {
           <Button type="submit" className="w-full" disabled={!isValid}>
             Login
           </Button>
-          <div className="flex justify-center hover:underline text-sm">
-            <Link href="/forgot-password">
-              Forgot password?
-            </Link>
-          </div>
         </form>
+        <SocialLogin />
+        <div className="flex justify-center hover:underline text-sm mt-4">
+          <Link href="/forgot-password">
+            Forgot password?
+          </Link>
+        </div>
+        
       </CardContent>
     </Card>
   );
