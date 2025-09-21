@@ -26,17 +26,18 @@ export default function LikeButton({ targetId, hasLiked }: Props) {
       onClick={toggleLike}
       disabled={isPending}
       aria-label={hasLiked ? "Unlike" : "Like"}
-      className="relative group transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+      className="relative group transition-opacity disabled:opacity-70 disabled:cursor-not-allowed"
     >
       <AiOutlineHeart
         size={28}
-        className="fill-white absolute -top-[2px] -right-[2px] pointer-events-none"
+        className={`${hasLiked ? 'fill-rose-500': 'fill-muted'} absolute -top-[2px] -right-[2px] pointer-events-none`}
       />
       <AiFillHeart
         size={24}
-        className={`transition-colors ${
-          hasLiked ? "fill-rose-500" : "fill-muted"
-        } group-hover:opacity-80`}
+        className={`transition-colors disabled:animate-ping
+          ${ hasLiked ?( isPending ? "fill-muted" : "fill-rose-500")  : ( isPending ? "fill-rose-500" : "fill-muted")}
+          ${isPending ? "animate-ping" : "opacity-100"}
+          group-hover:opacity-80`}
       />
     </button>
   );

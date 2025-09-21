@@ -1,28 +1,28 @@
-import { Button } from "@/components/ui/button"
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
+import Link from "next/link";
+import { Button } from "@/components/ui/button"; 
 
 export default async function Home() {
   const session = await auth();
+
   return (
-    <div>
-      <h1 className="text-3xl text-red-400">Hello</h1>
+    <div className="flex flex-col justify-center items-center mt-20 gap-6 text-foreground">
+      <h1 className="text-4xl font-bold">Welcome to MatchMe App</h1>
+
       {session ? (
-        <div>
-          <p>Welcome, {session.user?.name || "User"}!</p>
-          <pre>
-            {JSON.stringify(session, null, 2)}
-          </pre>
-          <form action ={async () => {
-            "use server";
-            await signOut();}}
-          >
-            <Button type="submit">Sign out</Button>
-          </form>
-        </div>
+        <Button asChild size="lg" variant="outline">
+          <Link href="/members">Continue</Link>
+        </Button>
       ) : (
-        <div> Mot logged it</div>
-      )
-     }
-     </div>
+        <div className="flex flex-row gap-4">
+          <Button asChild size="lg" variant="outline">
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link href="/register">Register</Link>
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

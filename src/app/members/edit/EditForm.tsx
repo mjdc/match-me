@@ -6,7 +6,7 @@ import {
 } from "@/lib/schemas/MemberEditSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Member } from "@prisma/client";
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +15,6 @@ import { updateMemberProfile } from "@/app/actions/userActions"
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { handleFormServerErrors } from "@/lib/utils";
-import { fr } from "zod/v4/locales";
 
 type Props = {
   member: Member;

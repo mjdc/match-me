@@ -6,10 +6,11 @@ import React from "react";
 export default async function PhotosPage({
   params,
 }: {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }) {
+  const {userId} = await params;
   const photos = await getMemberPhotosByUserId(
-    params.userId
+    userId
   );
   return (
     <CardInnerWrapper

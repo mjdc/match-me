@@ -27,8 +27,8 @@ export default function MemberImage({ photo }: Props) {
     try {
       await approvePhoto(photoId);
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error((error as Error).message);
     }
   };
 
@@ -36,8 +36,8 @@ export default function MemberImage({ photo }: Props) {
     try {
       await rejectPhoto(photo);
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error((error as Error).message);
     }
   };
 

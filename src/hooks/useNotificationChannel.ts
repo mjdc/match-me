@@ -13,17 +13,22 @@ export const useNotificationChannel = (userId: string | null, profileComplete: b
     
     const add = useMessageStore(state => state.add);
     const updateUnreadCount = useMessageStore(state => state.updateUnreadCount);
-
+    const addMessage = useMessageStore((state) => state.addMessage);
 
     const handleNewMessage = useCallback((message: MessageDto) => {
+        if(pathname === `/members/${message.senderId}/chat`) {
+            addMessage(message);
+            return;
+        }
         if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
             add(message);
             updateUnreadCount(1);
+            
         } else if (pathname !== `/members/${message.senderId}/chat`) {
             updateUnreadCount(1);
             newMessageToast(message);
         }
-    }, [add, pathname, searchParams, updateUnreadCount]);
+    }, [add, pathname, searchParams, updateUnreadCount, addMessage]);
 
     const handleNewLike = useCallback((data: { name: string, image: string | null, userId: string }) => {
         newLikeToast(data.name, data.image, data.userId);
@@ -46,5 +51,5 @@ export const useNotificationChannel = (userId: string | null, profileComplete: b
                 channelRef.current = null;
             }
         }
-    }, [userId, handleNewMessage, profileComplete])
+    }, [userId, handleNewMessage, profileComplete, handleNewLike])
 }

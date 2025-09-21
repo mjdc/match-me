@@ -40,8 +40,8 @@ export default function MemberPhotos({
     try {
       await setMainImage(photo);
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error((error as Error).message);
     } finally {
       setLoading({
         isLoading: false,

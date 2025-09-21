@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 import {
-  Card,
   CardHeader,
   CardContent,
   CardFooter,
@@ -25,7 +24,7 @@ export default function CardInnerWrapper({ header, body, footer }: Props) {
         )}
       </CardHeader>
       <Separator className="my-0" />
-      <CardContent>{body}</CardContent>
+      <CardContent className="overflow-scroll">{body}</CardContent>
 
       {footer && <CardFooter className="mt-auto">{footer}</CardFooter>}
     </>

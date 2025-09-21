@@ -13,7 +13,7 @@ export async function updateMemberProfile(data: MemberEditSchema, nameUpdated: b
 
         const validated = memberEditSchema.safeParse(data);
 
-        if (!validated.success) return { status: 'error', error: validated.error.errors }
+        if (!validated.success) return { status: 'error', error: validated.error.issues }
 
         const { name, description, city, country } = validated.data;
 

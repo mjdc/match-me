@@ -3,6 +3,10 @@ import usePresenceStore from './usePresenceStore'
 import { Channel, Members } from 'pusher-js';
 import { pusherClient } from '@/lib/pusher';
 import { updateLastActive } from '@/app/actions/memberActions';
+type ChannelMember = {
+  id: string;
+  [key: string]: unknown;
+};
 
 export const usePresenceChannel = (userId: string | null, profileComplete: boolean) => {
     const set = usePresenceStore(state => state.set);
@@ -33,11 +37,11 @@ export const usePresenceChannel = (userId: string | null, profileComplete: boole
                 await updateLastActive();
             })
 
-            channelRef.current.bind('pusher:member_added', (member: Record<string, any>) => {
+            channelRef.current.bind('pusher:member_added', (member: ChannelMember) => {
                 handleAddMember(member.id);
             })
 
-            channelRef.current.bind('pusher:member_removed', (member: Record<string, any>) => {
+            channelRef.current.bind('pusher:member_removed', (member: ChannelMember) => {
                 handleRemoveMember(member.id);
             });
         }

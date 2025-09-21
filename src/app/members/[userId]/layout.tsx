@@ -3,15 +3,17 @@ import React, { ReactNode } from "react";
 import MemberSidebar from "../MemberSidebar";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import { fetchCurrentUserLikeIds } from "@/app/actions/likeActions";
 
 export default async function Layout({
   children,
   params,
 }: {
   children: ReactNode;
-  params: { userId: string };
+  params: Promise<{ userId: string }>; 
 }) {
-  const member = await getMemberByUserId(params.userId);
+  const {userId} = await params;
+  const member = await getMemberByUserId(userId);
   if (!member) return notFound();
 
   const basePath = `/members/${member.userId}`;
@@ -24,11 +26,12 @@ export default async function Layout({
     },
     { name: "Chat", href: `${basePath}/chat` },
   ];
+  const likeIds = await fetchCurrentUserLikeIds();
 
   return (
     <div className="grid grid-cols-12 gap-5 h-[80vh] min-h-[48rem]">
       <div className="col-span-3">
-        <MemberSidebar member={member} navLinks={navLinks} />
+        <MemberSidebar member={member} navLinks={navLinks} hasLiked={likeIds.includes(member.userId)} />
       </div>
       <div className="col-span-9">
         <Card className="w-full mt-10 h-[80vh] min-h-[48rem] flex flex-col">

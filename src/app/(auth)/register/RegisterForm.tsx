@@ -5,6 +5,7 @@ import {
   profileSchema,
   registerSchema,
   RegisterSchema,
+  combinedRegisterSchema
 } from "@/lib/schemas/RegisterSchema";
 import { handleFormServerErrors } from "@/lib/utils";
 import {
@@ -25,20 +26,20 @@ import UserDetailsForm from "./UserDetailsForm";
 import ProfileDetailsForm from "./ProfileDetailsForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { sendVerificationEmail } from "@/lib/mail";
 
-const stepSchemas = [registerSchema, profileSchema];
+const stepSchemas = [
+  registerSchema.partial(), // Only require fields for step 1
+  profileSchema.partial(),  // Only require fields for step 2
+];
 
 export default function RegisterForm() {
   const [activeStep, setActiveStep] = useState(0);
-  const currentValidationSchema =
-    stepSchemas[activeStep];
+  const currentValidationSchema = stepSchemas[activeStep];
 
-  const registerFormMethods =
-    useForm<RegisterSchema>({
-      resolver: zodResolver(currentValidationSchema),
-      mode: "onTouched",
-    });
+  const registerFormMethods = useForm<RegisterSchema>({
+    resolver: zodResolver(combinedRegisterSchema.and(currentValidationSchema)),
+    mode: "onTouched",
+  });
 
   const {
     handleSubmit,
@@ -80,10 +81,6 @@ export default function RegisterForm() {
       setActiveStep((prev) => prev + 1);
     }
   };
-
-  const testSend = async () => {
-    await sendVerificationEmail('a', 'b');
-  }
 
   return (
     <Card className="w-3/5 mx-auto">

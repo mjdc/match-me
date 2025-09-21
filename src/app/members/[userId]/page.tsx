@@ -6,10 +6,11 @@ import React from "react";
 export default async function MemberDetailedPage({
   params,
 }: {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }) {
+  const {userId} = await params;
   const member = await getMemberByUserId(
-    params.userId
+    userId
   );
 
   if (!member) return notFound();

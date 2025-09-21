@@ -10,24 +10,35 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import PresenceDot from "@/components/PresenceDot";
+import LikeButton from "@/components/LikeButton";
 
 type Props = {
   member: Member;
   navLinks: { name: string; href: string }[];
+  hasLiked?: boolean;
 };
 
-export default function MemberSidebar({ member, navLinks }: Props) {
+export default function MemberSidebar({ member, navLinks, hasLiked }: Props) {
   const pathname = usePathname();
+
 
   return (
     <Card className="w-full mt-10 h-[80vh] min-h-[48rem] flex flex-col items-center">
-      <div className="mt-6 relative w-40 h-40 rounded-full overflow-hidden">
+      <div className="mt-6 w-50 h-50 relative">
         <Image
           src={member.image || "/images/user.png"}
           alt="User profile main image"
           fill
-          className="object-cover"
+          className="object-cover rounded-full p-2 overflow-hidden"
         />
+        <div className="absolute top-3 right-3 z-50">
+          {typeof hasLiked !== "undefined" && (
+            <LikeButton
+              targetId={member.userId}
+              hasLiked={hasLiked}
+            />
+          )}
+        </div>
       </div>
 
       <CardContent className="flex flex-col items-center mt-4 px-6 text-center overflow-hidden">

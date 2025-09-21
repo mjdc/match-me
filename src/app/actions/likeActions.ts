@@ -9,7 +9,16 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
         const userId = await getAuthUserId();
 
         if (isLiked) {
-           const like = await prisma.like.create({
+            await prisma.like.delete({
+                where: {
+                    sourceUserId_targetUserId: {
+                        sourceUserId: userId,
+                        targetUserId
+                    }
+                }
+            })
+        } else {
+            const like = await prisma.like.create({
                 data: {
                     sourceUserId: userId,
                     targetUserId
@@ -29,13 +38,6 @@ export async function toggleLikeMember(targetUserId: string, isLiked: boolean) {
                 name: like.sourceMember.name,
                 image: like.sourceMember.image,
                 userId: like.sourceMember.userId
-            })
-        } else {
-            await prisma.like.create({
-                data: {
-                    sourceUserId: userId,
-                    targetUserId
-                }
             })
         }
 

@@ -32,11 +32,19 @@ export default function NavLink({
             className
           )}
                     >
-                      <Link href={href} className="flex flex-row">
+                      <Link href={href} className="relative flex flex-row">
                         <span>{label}</span>
-                        {href === "/messages" && (
-                          <span className="ml-1">
-                            ({unreadCount})
+                        {href === "/messages" &&
+                        unreadCount > 0 && (
+                          <span
+                            className="
+                              bg-pink-400 text-white text-xs 
+                              rounded-full px-1.5 py-0.5 
+                              min-w-[20px] flex items-center justify-center
+                              shadow-md
+                            "
+                          >
+                            {unreadCount}
                           </span>
                         )}
                       </Link>

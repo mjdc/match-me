@@ -7,10 +7,11 @@ import MessageList from "./MessageList";
 import { createChatId } from "@/lib/utils";
 
 export default async function ChatPage({
-  params,
+  searchParams,
 }: {
-  params: { userId: string };
+  searchParams: Promise<{ userId: string }>;
 }) {
+  const params = await searchParams
   const messages = await getMessageThread(
     params.userId
   );

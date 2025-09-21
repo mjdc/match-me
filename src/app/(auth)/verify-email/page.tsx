@@ -3,14 +3,14 @@ import CardWrapper from "@/components/CardWrapper";
 import ResultMessage from "@/components/ResultMessage";
 import { MdOutlineMailOutline } from "react-icons/md";
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: {
-  searchParams: { token: string };
-}) {
-  const result = await verifyEmail(
-    searchParams.token
-  );
+interface PageProps {
+  searchParams: Promise<{ token: string }>; 
+}
+
+export default async function VerifyEmailPage({searchParams}: PageProps) {
+
+  const {token} = await searchParams;
+  const result = await verifyEmail(token ?? "");
 
   return (
     <CardWrapper

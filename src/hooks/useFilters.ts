@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, ChangeEvent, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { FaMale, FaFemale } from "react-icons/fa";
 import useFilterStore from "./useFilterStore";
 import usePaginationStore from "./usePaginationStore";

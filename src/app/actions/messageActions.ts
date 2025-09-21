@@ -14,7 +14,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 
         const validated = messageSchema.safeParse(data);
 
-        if (!validated.success) return { status: 'error', error: validated.error.errors }
+        if (!validated.success) return { status: 'error', error: validated.error.issues }
 
         const { text } = validated.data;
 
@@ -28,7 +28,8 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
         });
         const messageDto = mapMessageToMessageDto(message);
 
-        await pusherServer.trigger(createChatId(userId, recipientUserId), 'message:new', messageDto);
+        const chatId = createChatId(userId, recipientUserId);
+        await pusherServer.trigger(chatId, 'message:new', messageDto);
         await pusherServer.trigger(`private-${recipientUserId}`, 'message:new', messageDto);
 
         return { status: 'success', data: messageDto };

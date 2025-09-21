@@ -14,6 +14,7 @@ import { HiPaperAirplane } from "react-icons/hi2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PiSpinnerGap } from "react-icons/pi";
+import useMessageStore from "@/hooks/useMessageStore";
 
 export default function ChatForm() {
   const router = useRouter();
@@ -29,11 +30,13 @@ export default function ChatForm() {
     resolver: zodResolver(messageSchema),
   });
 
+  const addMessage = useMessageStore((state) => state.addMessage);
   const onSubmit = async (data: MessageSchema) => {
     const result = await createMessage(params.userId, data);
     if (result.status === "error") {
       handleFormServerErrors(result, setError);
     } else {
+      addMessage(result.data);
       reset();
       router.refresh();
     }

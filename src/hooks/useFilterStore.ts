@@ -3,9 +3,12 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 type FilterState = {
-    filters: UserFilters;
-    setFilters: (filterName: keyof FilterState['filters'], value: any) => void;
-}
+  filters: UserFilters;
+  setFilters: <K extends keyof UserFilters>(
+    filterName: K,
+    value: UserFilters[K]
+  ) => void;
+};
 
 const useFilterStore = create<FilterState>()(devtools((set) => ({
     filters: {

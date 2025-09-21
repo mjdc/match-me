@@ -10,12 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Session } from "next-auth";
+
 import Link from "next/link";
 import Image from "next/image";
-type Props = {
-  user: Session["user"];
+type UserInfo = {
+  image: string | null;
+  name: string | null;
 };
+
+interface Props {
+  user: UserInfo;
+}
 
 export default function UserMenu({ user }: Props) {
   return (

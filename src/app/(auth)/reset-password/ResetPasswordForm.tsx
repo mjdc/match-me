@@ -13,19 +13,13 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
-import {
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const [result, setResult] =
-    useState<ActionResult<string> | null>(null);
+  const [result, setResult] = useState<ActionResult<string> | null>(null);
 
   const {
     register,
@@ -38,12 +32,7 @@ export default function ResetPasswordForm() {
   });
 
   const onSubmit = async (data: ResetPasswordSchema) => {
-    setResult(
-      await resetPassword(
-        data.password,
-        searchParams.get("token")
-      )
-    );
+    setResult(await resetPassword(data.password, searchParams.get("token")));
     reset();
   };
 
@@ -57,42 +46,35 @@ export default function ResetPasswordForm() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col space-y-4"
         >
-          <FormItem>
-            <FormLabel>Password</FormLabel>
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="Enter new password"
-                {...register("password")}
-              />
-            </FormControl>
+          <div>
+            <Input
+              type="password"
+              placeholder="Password"
+              {...register("password")}
+              className={errors.password ? "border-red-500" : ""}
+            />
             {errors.password && (
-              <FormMessage>
+              <p className="text-sm text-red-500 mt-1">
                 {errors.password.message}
-              </FormMessage>
+              </p>
             )}
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Confirm Password</FormLabel>
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="Confirm new password"
-                {...register("confirmPassword")}
-              />
-            </FormControl>
+          <div>
+            <Input
+              type="password"
+              placeholder="Confirm Password"
+              {...register("confirmPassword")}
+              className={errors.confirmPassword ? "border-red-500" : ""}
+            />
             {errors.confirmPassword && (
-              <FormMessage>
+              <p className="text-sm text-red-500 mt-1">
                 {errors.confirmPassword.message}
-              </FormMessage>
+              </p>
             )}
-          </FormItem>
+          </div>
 
-          <Button
-            type="submit"
-            disabled={!isValid}
-          >
+          <Button type="submit" className="w-full" disabled={!isValid || isSubmitting}>
             {isSubmitting ? "Resetting..." : "Reset password"}
           </Button>
         </form>

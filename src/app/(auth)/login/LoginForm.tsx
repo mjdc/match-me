@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useTransition } from "react";
 import { GiPadlock } from "react-icons/gi";
 import { useForm } from "react-hook-form";
 import {
@@ -22,9 +22,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import SocialLogin from "./SocialLogin";
+import { Loader2 } from "lucide-react";
 
 export default function LoginForm() {
-const {register, handleSubmit, formState: { errors, isValid }} = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginSchema>({
     mode: "onChange",
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,17 +37,20 @@ const {register, handleSubmit, formState: { errors, isValid }} = useForm({
       password: "",
     },
   });
-const router = useRouter();
-const onSubmit = async(data: LoginSchema) => {
-    const result = await signInUser(data);
-    if (result.status === "success") {
-      router.push("/members"); 
-      // router.refresh(); no longer needed in Next.js 13 with app directory
-    } else {
-      toast.error(`Login error: ${result.error as string}`);
-      
-    }
-}
+
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (data: LoginSchema) => {
+    startTransition(async () => {
+      const result = await signInUser(data);
+      if (result.status === "success") {
+        router.push("/members");
+      } else {
+        toast.error(`Login error: ${result.error as string}`);
+      }
+    });
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -59,7 +67,10 @@ const onSubmit = async(data: LoginSchema) => {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mb-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 mb-4"
+        >
           <div>
             <Input
               type="email"
@@ -88,17 +99,25 @@ const onSubmit = async(data: LoginSchema) => {
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={!isValid}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!isValid || isPending}
+          >
             Login
+            {isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
           </Button>
         </form>
+
         <SocialLogin />
+
         <div className="flex justify-center hover:underline text-sm mt-4">
           <Link href="/forgot-password">
             Forgot password?
           </Link>
         </div>
-        
       </CardContent>
     </Card>
   );

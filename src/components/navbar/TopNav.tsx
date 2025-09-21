@@ -48,12 +48,13 @@ export default async function TopNav() {
         <div className="hidden md:flex gap-6">
           <NavigationMenu>
             <NavigationMenuList>
-              {links.map((item) => (
-                <NavLink
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                />
+              {session &&
+                links.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                  />
               ))}
             </NavigationMenuList>
           </NavigationMenu>
@@ -63,7 +64,7 @@ export default async function TopNav() {
         <div className="flex items-center gap-3">
          {
           userInfo ? (
-            <UserMenu userInfo={userInfo} />
+            <UserMenu user={userInfo} />
           ) : (
             <>
               <Button asChild variant="outline" className="border-white text-pink-600 hover:bg-white hover:text-pink-600">

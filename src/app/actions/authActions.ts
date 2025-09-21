@@ -4,7 +4,7 @@ import { auth, signIn, signOut } from '@/auth';
 import { sendPasswordResetEmail, sendVerificationEmail } from '@/lib/mail';
 import { prisma } from '@/lib/prisma';
 import { LoginSchema } from '@/lib/schemas/LoginSchema';
-import { combinedRegisterSchema, ProfileSchema, registerSchema, RegisterSchema } from '@/lib/schemas/RegisterSchema';
+import { combinedRegisterSchema, ProfileSchema, RegisterSchema } from '@/lib/schemas/RegisterSchema';
 import { generateToken, getTokenByToken } from '@/lib/tokens';
 import { ActionResult } from '@/types';
 import { TokenType, User } from '@prisma/client';
@@ -56,7 +56,7 @@ export async function registerUser(data: RegisterSchema): Promise<ActionResult<U
         const validated = combinedRegisterSchema.safeParse(data);
 
         if (!validated.success) {
-            return { status: 'error', error: validated.error.errors }
+            return { status: 'error', error: validated.error.issues }
         }
 
         const { name, email, password, gender, description, city, country, dateOfBirth, } = validated.data;
