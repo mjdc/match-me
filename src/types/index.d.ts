@@ -16,6 +16,12 @@ type MessageDto = {
     recipientImage?: string | null
 }
 
+type ClientMessage = MessageDto & {
+  sent?: string;       
+  pending?: boolean;
+  error?: boolean;
+};
+
 type MessageWithSenderRecipient = Prisma.MessageGetPayload<{
     select: {
         id: true,

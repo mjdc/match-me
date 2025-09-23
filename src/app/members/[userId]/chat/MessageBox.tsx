@@ -1,13 +1,13 @@
 "use client";
 
-import { MessageDto } from "@/types";
+import { ClientMessage } from "@/types";
 import React, { useRef, useEffect } from "react";
 import clsx from "clsx";
 import { timeAgo } from "@/lib/utils";
 import PresenceAvatar from "@/components/PresenceAvatar";
 
 type Props = {
-  message: MessageDto;
+  message: ClientMessage;
   currentUserId: string;
 };
 
@@ -63,11 +63,12 @@ export default function MessageBox({ message, currentUserId }: Props) {
         className={clsx("flex gap-2 mb-3", {
           "justify-end text-right": isCurrentUserSender,
           "justify-start": !isCurrentUserSender,
+          "opacity-50": message.pending,
         })}
       >
         {!isCurrentUserSender && renderAvatar()}
         {renderMessageContent()}
-        {isCurrentUserSender && renderAvatar()}
+        {isCurrentUserSender && !message.pending && renderAvatar()}
       </div>
       <div ref={messageEndRef} />
     </div>

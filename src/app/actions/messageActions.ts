@@ -39,8 +39,9 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     }
 }
 
-export async function getMessageThread(recipientId: string) {
+export async function getMessageThread(recipientId: string, limit = 20, cursor?: string) {
     try {
+        console.log('getting message thread for', recipientId);
         const userId = await getAuthUserId();
 
         const messages = await prisma.message.findMany({
@@ -61,8 +62,15 @@ export async function getMessageThread(recipientId: string) {
             orderBy: {
                 created: 'asc'
             },
-            select: messageSelect
+            select: messageSelect,
+            take: limit,
+            ...(cursor ? { skip: 1, cursor: { id: cursor } } : {})
         })
+        // Generate nextCursor from the last message in the batch
+        let nextCursor: string | undefined = undefined;
+        if (messages.length === limit) {
+            nextCursor = messages[messages.length - 1].id;
+        }
 
         let readCount = 0;
 
@@ -87,14 +95,14 @@ export async function getMessageThread(recipientId: string) {
             await pusherServer.trigger(createChatId(recipientId, userId), 'messages:read', unreadMessageIds);
         }
 
-        return { messages: messages.map(message => mapMessageToMessageDto(message)), readCount }
+        return { messages: messages.map(message => mapMessageToMessageDto(message)), readCount , nextCursor}
     } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
-export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 2) {
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 4) {
     try {
         const userId = await getAuthUserId();
 

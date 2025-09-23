@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageDto } from "@/types";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import MessageTableCell from "./MessageTableCell";
 import { useMessages } from "@/hooks/useMessages";
 import {
@@ -16,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   initialMessages: MessageDto[];
@@ -38,6 +37,29 @@ export default function MessageTable({
     loadingMore,
     hasMore,
   } = useMessages(initialMessages, nextCursor);
+
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const currentLoader = loaderRef.current;
+    if (!currentLoader) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasMore && !loadingMore) {
+          loadMore();
+        }
+      },
+      { root: null, rootMargin: "100px", threshold: 0 }
+    );
+
+    observer.observe(currentLoader);
+
+    return () => {
+      if (currentLoader) observer.unobserve(currentLoader);
+    };
+  }, [hasMore, loadingMore, loadMore]);
 
   return (
     <div className="flex flex-col h-[80vh]">
@@ -100,22 +122,13 @@ export default function MessageTable({
               )}
             </TableBody>
           </Table>
-        </CardContent>
 
-        {/* Sticky footer with Load More */}
-        <div className="sticky bottom-0 pb-3 mr-3 text-right bg-background">
-          <Button
-            variant="outline"
-            disabled={!hasMore || loadingMore}
-            onClick={loadMore}
-          >
-            {loadingMore
-              ? "Loading..."
-              : hasMore
-              ? "Load more"
-              : "No more messages"}
-          </Button>
-        </div>
+          {/* Loader sentinel */}
+          <div ref={loaderRef} className="h-12 flex items-center justify-center">
+            {loadingMore && <span className="text-muted-foreground">Loading...</span>}
+            {!hasMore && <span className="text-muted-foreground">No more messages</span>}
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

@@ -18,9 +18,8 @@ export const useNotificationChannel = (userId: string | null, profileComplete: b
     const handleNewMessage = useCallback((message: MessageDto) => {
         if(pathname === `/members/${message.senderId}/chat`) {
             addMessage(message);
-            return;
         }
-        if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
+        else if (pathname === '/messages' && searchParams.get('container') !== 'outbox') {
             add(message);
             updateUnreadCount(1);
             

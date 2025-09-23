@@ -7,7 +7,7 @@ import {
 } from "@/lib/schemas/MessageSchema";
 import { handleFormServerErrors } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { HiPaperAirplane } from "react-icons/hi2";
@@ -16,8 +16,8 @@ import { Input } from "@/components/ui/input";
 import { PiSpinnerGap } from "react-icons/pi";
 import useMessageStore from "@/hooks/useMessageStore";
 
-export default function ChatForm() {
-  const router = useRouter();
+
+export default function ChatForm({ userId }: { userId: string }) {
   const params = useParams<{ userId: string }>();
 
   const {
@@ -31,16 +31,36 @@ export default function ChatForm() {
   });
 
   const addMessage = useMessageStore((state) => state.addMessage);
+  const replaceMessage = useMessageStore((state) => state.replaceMessage);
+  const markFailed = useMessageStore((state) => state.markFailed);
   const onSubmit = async (data: MessageSchema) => {
+    const sentDate = new Date().getTime();
+    const sent = sentDate.toString();
+    // 1. Optimistic pending message
+    addMessage({
+      id: sent, // real id will come later
+      sent: sent,
+      text: data.text,
+      senderId: userId, 
+      recipientId: params.userId,
+      created: new Date(sentDate).toLocaleString('en-US'),
+      dateRead: null,
+      pending: true,
+    });
+
+    reset();
+
     const result = await createMessage(params.userId, data);
+
     if (result.status === "error") {
       handleFormServerErrors(result, setError);
+      markFailed(sent);
     } else {
-      addMessage(result.data);
-      reset();
-      router.refresh();
+      // replace pending with server version
+      replaceMessage(sent, { ...result.data, pending: false, sent });
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -64,9 +84,6 @@ export default function ChatForm() {
           
         </Button>
       </div>
-      {/* {errors.text?.message && (
-        <p className="text-sm text-destructive mt-1">{errors.text.message}</p>
-      )} */}
       {errors.root?.serverError && (
         <p className="text-sm text-destructive mt-1">
           {errors.root.serverError.message}

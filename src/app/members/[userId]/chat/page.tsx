@@ -7,19 +7,19 @@ import MessageList from "./MessageList";
 import { createChatId } from "@/lib/utils";
 
 export default async function ChatPage({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ userId: string }>;
+  params: Promise<{ userId: string }>;
 }) {
-  const params = await searchParams
+  const paramsResolved = await params
   const messages = await getMessageThread(
-    params.userId
+    paramsResolved.userId, 20
   );
   const userId = await getAuthUserId();
 
   const chatId = createChatId(
     userId,
-    params.userId
+    paramsResolved.userId
   );
 
   return (
@@ -32,7 +32,7 @@ export default async function ChatPage({
           chatId={chatId}
         />
       }
-      footer={<ChatForm />}
+      footer={<ChatForm userId={userId}/>}
     />
   );
 }
