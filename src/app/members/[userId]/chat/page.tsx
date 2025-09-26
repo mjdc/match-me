@@ -30,6 +30,7 @@ export default async function ChatPage({
           initialMessages={messages}
           currentUserId={userId}
           chatId={chatId}
+          recipientId={paramsResolved.userId}
         />
       }
       footer={<ChatForm userId={userId}/>}

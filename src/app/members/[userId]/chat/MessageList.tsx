@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageDto } from "@/types";
-import React, {useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import MessageBox from "./MessageBox";
 import { pusherClient } from "@/lib/pusher";
 import { formatShortDateTime } from "@/lib/utils";
@@ -22,59 +22,89 @@ export default function MessageList({
   initialMessages,
   currentUserId,
   chatId,
-  recipientId
+  recipientId,
 }: Props) {
   const setReadCount = useRef(false);
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  // pull from Zustand store
+
   const messages = useMessageStore((state) => state.messages);
-  // const addMessage = useMessageStore((state) => state.add);
   const setMessages = useMessageStore((state) => state.set);
   const updateUnreadCount = useMessageStore((state) => state.updateUnreadCount);
   const resetMessages = useMessageStore((state) => state.resetMessages);
 
-  // initialize store with initialMessages
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const prevScrollHeight = useRef(0);
+
+  // Initialize store with initial messages
   useEffect(() => {
     resetMessages();
     setMessages(initialMessages.messages);
+
     // Set cursor to the last message's id for infinite scroll
     if (initialMessages.messages.length > 0) {
       setCursor(initialMessages.messages[initialMessages.messages.length - 1].id);
-    } else {
-      setCursor(undefined);
     }
 
     if (!setReadCount.current) {
       updateUnreadCount(-initialMessages.readCount);
       setReadCount.current = true;
     }
-  }, [chatId, resetMessages, initialMessages.messages, initialMessages.readCount, setMessages, updateUnreadCount]);
+  }, [
+    chatId,
+    initialMessages.messages,
+    initialMessages.readCount,
+    resetMessages,
+    setMessages,
+    updateUnreadCount,
+  ]);
 
-  // Infinite scroll handler
-  const topRef = useRef<HTMLDivElement>(null);
+  // Scroll to bottom on initial load
+  useEffect(() => {
+    if (messages.length === initialMessages.messages.length) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, initialMessages.messages.length]);
 
+  // Infinite scroll for older messages
   useEffect(() => {
     if (!topRef.current) return;
-    const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting && !loading && cursor) {
-        setLoading(true);
-        const res = await getMessageThread(recipientId, 20, cursor);
-        setMessages([...res.messages, ...messages]);
-        // Update cursor to the last message's id from the new batch
-        if (res.messages.length > 0) {
-          setCursor(res.messages[res.messages.length - 1].id);
-        } else {
-          setCursor(undefined);
+
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (entry.isIntersecting && !loading && cursor) {
+          if (!containerRef.current) return;
+          prevScrollHeight.current = containerRef.current.scrollHeight;
+
+          setLoading(true);
+          const res = await getMessageThread(recipientId, 20, cursor);
+          setMessages([...res.messages, ...messages]);
+
+          if (res.messages.length > 0) {
+            setCursor(res.messages[res.messages.length - 1].id);
+          } else {
+            setCursor(undefined);
+          }
+
+          setLoading(false);
+
+          // Keep scroll position stable after prepending messages
+          if (containerRef.current) {
+            const newScrollHeight = containerRef.current.scrollHeight;
+            containerRef.current.scrollTop += newScrollHeight - prevScrollHeight.current;
+          }
         }
-        setLoading(false);
-      }
-    }, { threshold: 1 });
+      },
+      { threshold: 1 }
+    );
+
     observer.observe(topRef.current);
     return () => observer.disconnect();
   }, [cursor, loading, messages, recipientId, setMessages]);
 
-  // handle read messages
+  // Handle read messages
   const handleReadMessages = useCallback(
     (messageIds: string[]) => {
       const updated = messages.map((message) =>
@@ -87,15 +117,13 @@ export default function MessageList({
     [messages, setMessages]
   );
 
-  // subscribe to Pusher
+  // Pusher subscription
   useEffect(() => {
     const channel = pusherClient.subscribe(chatId);
-    // channel.bind("message:new", handleNewMessage);
     channel.bind("messages:read", handleReadMessages);
 
     return () => {
       channel.unsubscribe();
-      // channel.unbind("message:new", handleNewMessage);
       channel.unbind("messages:read", handleReadMessages);
     };
   }, [chatId, handleReadMessages]);
@@ -105,9 +133,11 @@ export default function MessageList({
       {messages.length === 0 ? (
         "No messages to display"
       ) : (
-        <>
-          <div ref={topRef} />
-          {loading && <div>Loading...</div>}
+        <div
+          ref={containerRef}
+          className="flex flex-col-reverse overflow-y-auto h-[600px]"
+        >
+          <div ref={bottomRef} />
           {messages.map((message) => (
             <MessageBox
               key={message.id}
@@ -115,7 +145,9 @@ export default function MessageList({
               currentUserId={currentUserId}
             />
           ))}
-        </>
+          <div ref={topRef} />
+          {loading && <div>Loading...</div>}
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageDto } from "@/types";
+import { MessageDto, Thread } from "@/types";
 import React, { useEffect, useRef } from "react";
 import MessageTableCell from "./MessageTableCell";
 import { useMessages } from "@/hooks/useMessages";
@@ -18,12 +18,12 @@ import {
 } from "@/components/ui/table";
 
 type Props = {
-  initialMessages: MessageDto[];
+  initialThreads: Thread[];
   nextCursor?: string;
 };
 
 export default function MessageTable({
-  initialMessages,
+  initialThreads,
   nextCursor,
 }: Props) {
   const {
@@ -33,11 +33,12 @@ export default function MessageTable({
     deleteMessage,
     selectRow,
     messages,
+    threads, // <-- threads now available
     loadMore,
     loadingMore,
     hasMore,
-  } = useMessages(initialMessages, nextCursor);
-
+  } = useMessages(initialThreads, nextCursor);
+  // console.log('table threads', threads)
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -90,35 +91,42 @@ export default function MessageTable({
                   </TableCell>
                 </TableRow>
               ) : (
-                messages.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className="cursor-pointer"
-                    onClick={() => selectRow(item.id)}
-                  >
-                    {columns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        className={
-                          !item.dateRead && !isOutbox
-                            ? "font-semibold"
-                            : ""
-                        }
-                      >
-                        <MessageTableCell
-                          item={item}
-                          columnKey={col.key}
-                          isOutbox={isOutbox}
-                          deleteMessage={deleteMessage}
-                          isDeleting={
-                            isDeleting.loading &&
-                            isDeleting.id === item.id
+                messages.map((item) => {
+                  // Find the thread for this message
+                  const thread = threads.find(
+                    (t) => t.lastMessage.id === item.id
+                  );
+                  return (
+                    <TableRow
+                      key={item.id}
+                      className="cursor-pointer"
+                      onClick={() => selectRow(item.id)}
+                    >
+                      {columns.map((col) => (
+                        <TableCell
+                          key={col.key}
+                          className={
+                            !item.dateRead && !isOutbox
+                              ? "font-semibold"
+                              : ""
                           }
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                        >
+                          <MessageTableCell
+                            item={item}
+                            columnKey={col.key}
+                            isOutbox={isOutbox}
+                            deleteMessage={deleteMessage}
+                            isDeleting={
+                              isDeleting.loading &&
+                              isDeleting.id === item.id
+                            }
+                            unreadCount={thread?.unreadCount} // <-- Pass unreadCount from thread
+                          />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

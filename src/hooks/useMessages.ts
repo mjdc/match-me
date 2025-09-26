@@ -2,7 +2,7 @@ import {
   deleteMessage,
   getMessagesByContainer,
 } from "@/app/actions/messageActions";
-import { MessageDto } from "@/types";
+import { MessageDto, Thread } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import {
@@ -18,21 +18,20 @@ const outboxColumns = [
   { key: "recipientName", label: "Recipient" },
   { key: "text", label: "Message" },
   { key: "created", label: "Date sent" },
-  { key: "actions", label: "Actions" },
+  // { key: "actions", label: "Actions" },
 ];
 
 const inboxColumns = [
   { key: "senderName", label: "Sender" },
   { key: "text", label: "Message" },
   { key: "created", label: "Date received" },
-  { key: "actions", label: "Actions" },
+  // { key: "actions", label: "Actions" },
 ];
 
 export const useMessages = (
-  initialMessages: MessageDto[],
+  initialThreads: Thread[],
   nextCursor?: string
 ) => {
-
   const set = useMessageStore((state) => state.set);
   const remove = useMessageStore((state) => state.remove);
   const messages = useMessageStore((state) => state.messages);
@@ -50,31 +49,32 @@ export const useMessages = (
     loading: false,
   });
 
-  const [loadingMore, setLoadingMore] =
-    useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Track threads for unreadCount and lastMessage
+  const [threads, setThreads] = useState<Thread[]>(initialThreads);
 
   useEffect(() => {
-    set(initialMessages);
+    set(initialThreads.map(thread => thread.lastMessage));
+    setThreads(initialThreads);
     cursorRef.current = nextCursor;
 
     return () => {
       resetMessages();
+      setThreads([]);
     };
-  }, [initialMessages, set, nextCursor, resetMessages]);
+  }, [initialThreads, set, nextCursor, resetMessages]);
 
   const loadMore = useCallback(async () => {
     if (cursorRef.current) {
       setLoadingMore(true);
-      const { messages, nextCursor } =
-        await getMessagesByContainer(
-          container,
-          cursorRef.current
-        );
-      set(messages);
+      const { threads: newThreads, nextCursor } = await getMessagesByContainer(container, cursorRef.current);
+      setThreads(prev => [...prev, ...newThreads]);
+      set([...messages, ...newThreads.map(thread => thread.lastMessage)]);
       cursorRef.current = nextCursor;
       setLoadingMore(false);
     }
-  }, [container, set]);
+  }, [container, messages, set]);
 
   const columns = isOutbox
     ? outboxColumns
@@ -112,6 +112,7 @@ export const useMessages = (
     selectRow: handleRowSelect,
     isDeleting,
     messages,
+    threads, // <-- Pass threads for unreadCount
     loadingMore,
     loadMore,
     hasMore: !!cursorRef.current,

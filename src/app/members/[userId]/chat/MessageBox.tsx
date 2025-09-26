@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientMessage } from "@/types";
-import React, { useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { timeAgo } from "@/lib/utils";
 import PresenceAvatar from "@/components/PresenceAvatar";
@@ -13,12 +13,11 @@ type Props = {
 
 export default function MessageBox({ message, currentUserId }: Props) {
   const isCurrentUserSender = message.senderId === currentUserId;
-  const messageEndRef = useRef<HTMLDivElement>(null);
+  // const messageEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messageEndRef]);
-
+  // useEffect(() => {
+  //   messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // }, [messageEndRef]);
   const renderAvatar = () => (
      <div className="self-end">
       <PresenceAvatar
@@ -70,7 +69,7 @@ export default function MessageBox({ message, currentUserId }: Props) {
         {renderMessageContent()}
         {isCurrentUserSender && !message.pending && renderAvatar()}
       </div>
-      <div ref={messageEndRef} />
+      {/* <div ref={messageEndRef} /> */}
     </div>
   );
 }

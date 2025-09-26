@@ -29,7 +29,7 @@ const useMessageStore = create<MessageState>()(
       set((state) => ({ messages: [message, ...state.messages] })),
 
     addMessage: (message) =>
-      set((state) => ({ messages: [...state.messages, message] })),
+      set((state) => ({ messages: [message, ...state.messages] })),
 
     replaceMessage: (sent, newMsg) =>
       set((state) => ({

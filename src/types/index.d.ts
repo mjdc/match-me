@@ -22,6 +22,11 @@ type ClientMessage = MessageDto & {
   error?: boolean;
 };
 
+type Thread = {
+    lastMessage: MessageDto;
+    unreadCount: number;
+}
+
 type MessageWithSenderRecipient = Prisma.MessageGetPayload<{
     select: {
         id: true,

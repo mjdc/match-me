@@ -11,6 +11,7 @@ type Props = {
   isOutbox: boolean;
   deleteMessage: (message: MessageDto) => void;
   isDeleting: boolean;
+  unreadCount?: number; // <-- Add this line
 };
 
 export default function MessageTableCell({
@@ -19,6 +20,7 @@ export default function MessageTableCell({
   isOutbox,
   deleteMessage,
   isDeleting,
+  unreadCount, // <-- Add this line
 }: Props) {
   const cellValue = item[columnKey as keyof MessageDto];
 
@@ -32,6 +34,12 @@ export default function MessageTableCell({
             src={isOutbox ? item.recipientImage : item.senderImage}
           />
           <span className="truncate max-w-[160px]">{cellValue}</span>
+          {/* Show unreadCount badge for inbox only */}
+          {unreadCount! > 0 && !isOutbox && (
+              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                  {unreadCount}
+              </span>
+          )}
         </div>
       );
 
@@ -41,18 +49,5 @@ export default function MessageTableCell({
     case "created":
       return <span>{new Date(cellValue as string).toLocaleString()}</span>;
 
-    default:
-      return (
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Delete message"
-          onClick={() => deleteMessage(item)}
-          disabled={isDeleting}
-          className="text-red-500 hover:text-red-600"
-        >
-          <AiFillDelete className="w-5 h-5" />
-        </Button>
-      );
   }
 }

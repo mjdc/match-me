@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { mapMessageToMessageDto } from '@/lib/mappings';
 import { pusherServer } from '@/lib/pusher';
 import { createChatId } from '@/lib/utils';
+import { Prisma } from '@prisma/client';
 
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
     try {
@@ -39,9 +40,9 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
     }
 }
 
-export async function getMessageThread(recipientId: string, limit = 20, cursor?: string) {
+export async function getMessageThread(recipientId: string, limit = 10, cursor?: string) {
     try {
-        console.log('getting message thread for', recipientId);
+        console.log('called getMessageThread')
         const userId = await getAuthUserId();
 
         const messages = await prisma.message.findMany({
@@ -60,20 +61,19 @@ export async function getMessageThread(recipientId: string, limit = 20, cursor?:
                 ]
             },
             orderBy: {
-                created: 'asc'
+                created: 'desc' // Corrected: Order by descending to get most recent messages first
             },
             select: messageSelect,
             take: limit,
             ...(cursor ? { skip: 1, cursor: { id: cursor } } : {})
-        })
-        // Generate nextCursor from the last message in the batch
+        });
         let nextCursor: string | undefined = undefined;
         if (messages.length === limit) {
             nextCursor = messages[messages.length - 1].id;
         }
-
+        
+        // Corrected: The rest of the logic remains mostly the same
         let readCount = 0;
-
         if (messages.length > 0) {
             const unreadMessageIds = messages
                 .filter(m => m.dateRead === null
@@ -96,49 +96,97 @@ export async function getMessageThread(recipientId: string, limit = 20, cursor?:
         }
 
         return { messages: messages.map(message => mapMessageToMessageDto(message)), readCount , nextCursor}
+
     } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
-export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 4) {
-    try {
-        const userId = await getAuthUserId();
+export async function getMessagesByContainer(container?: string | null, cursor?: string, limit = 10) {
+  try {
+    const isOutbox = container === 'outbox';
+    const userId = await getAuthUserId();
 
-        const conditions = {
-            [container === 'outbox' ? 'senderId' : 'recipientId']: userId,
-            ...(container === 'outbox' ? { senderDeleted: false } : { recipientDeleted: false }),
-        }
+    console.log(`Getting messages for userId: ${userId} in container: ${container}`);
 
-        const messages = await prisma.message.findMany({
-            where: {
-                ...conditions,
-                ...(cursor ? { created: { lte: new Date(cursor) } } : {})
-            },
-            orderBy: {
-                created: 'desc'
-            },
-            select: messageSelect,
-            take: limit + 1
-        });
-
-        let nextCursor: string | undefined;
-
-        if (messages.length > limit) {
-            const nextItem = messages.pop();
-            nextCursor = nextItem?.created.toISOString();
-        } else {
-            nextCursor = undefined
-        }
-
-        const messagesToReturn = messages.map(message => mapMessageToMessageDto(message));
-
-        return { messages: messagesToReturn, nextCursor }
-    } catch (error) {
-        console.log(error);
-        throw error;
+    if (!userId) {
+      console.error('Authentication Error: User ID not found.');
+      return { threads: [], nextCursor: undefined };
     }
+
+    const distinctColumn = isOutbox ? '"recipientId"' : '"senderId"';
+    const otherColumn = isOutbox ? '"senderId"' : '"recipientId"';
+    const deleteColumn = isOutbox ? '"senderDeleted"' : '"recipientDeleted"';
+
+    const rawQuery = Prisma.sql`
+      SELECT DISTINCT ON (${Prisma.raw(distinctColumn)})
+        m.id,
+        m.text,
+        m.created,
+        m."dateRead",
+        m."senderId",
+        m."recipientId",
+        s."userId" as "senderUserId",
+        s.name as "senderName",
+        s.image as "senderImage",
+        r."userId" as "recipientUserId",
+        r.name as "recipientName",
+        r.image as "recipientImage",
+        (
+          SELECT COUNT(*)
+          FROM "Message" um
+          WHERE um.${Prisma.raw(distinctColumn)} = m.${Prisma.raw(distinctColumn)}
+            AND um.${Prisma.raw(otherColumn)} = ${userId}
+            AND um."dateRead" IS NULL
+            ${isOutbox ? Prisma.empty : Prisma.sql`AND um."recipientDeleted" = false`}
+        ) as "unreadCount"
+      FROM "Message" m
+      LEFT JOIN "Member" s ON m."senderId" = s."userId"
+      LEFT JOIN "Member" r ON m."recipientId" = r."userId"
+      WHERE m.${Prisma.raw(isOutbox ? '"senderId"' : '"recipientId"')} = ${userId}
+        AND m.${Prisma.raw(deleteColumn)} = false
+        ${cursor ? Prisma.sql`AND m."created" <= ${cursor}::timestamp` : Prisma.empty}
+      ORDER BY ${Prisma.raw(distinctColumn)}, m."created" DESC
+      LIMIT ${limit + 1};
+    `;
+
+    const rawThreads = await prisma.$queryRaw<any[]>(rawQuery);
+
+    console.log(`Query returned ${rawThreads.length} threads.`);
+
+    // Map each raw row to the desired thread and message DTO format
+    const threads = rawThreads.slice(0, limit).map(row => {
+      const lastMessage: MessageDto = {
+        id: row.id,
+        text: row.text,
+        created: row.created,
+        dateRead: row.dateRead,
+        senderId: row.senderUserId,
+        senderName: row.senderName,
+        senderImage: row.senderImage,
+        recipientId: row.recipientUserId,
+        recipientName: row.recipientName,
+        recipientImage: row.recipientImage,
+      };
+      
+      return {
+        // Use your map function to convert the message data
+        lastMessage,
+        unreadCount: Number(row.unreadCount) || 0,
+      };
+    });
+
+    let nextCursor: string | undefined;
+    if (rawThreads.length > limit) {
+      nextCursor = rawThreads[rawThreads.length - 1].created.toISOString();
+    }
+
+    return { threads, nextCursor };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 export async function deleteMessage(messageId: string, isOutbox: boolean) {
