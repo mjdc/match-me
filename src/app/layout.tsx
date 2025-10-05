@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import TopNav from "@/components/navbar/TopNav";
+import TopNavGlass from "@/components/navbar/TopNavGlass";
 import { auth } from "@/auth";
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function RootLayout({
           profileComplete={profileComplete}
           userId={userId}
         >
-          <TopNav />
+          <TopNavGlass />
           <main className="container mx-auto">
             {children}
           </main>
