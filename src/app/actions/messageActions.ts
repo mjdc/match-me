@@ -9,6 +9,20 @@ import { pusherServer } from '@/lib/pusher';
 import { createChatId } from '@/lib/utils';
 import { Prisma } from '@prisma/client';
 
+type ThreadDto = {
+  id: string;
+  text: string;
+  created: string; 
+  dateRead: string | null; 
+  senderId: string; 
+  senderName: string;
+  senderImage: string | null;
+  recipientId: string; 
+  recipientName: string;
+  recipientImage: string | null;
+  unreadCount: bigint; 
+}
+
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<MessageDto>> {
     try {
         const userId = await getAuthUserId();
@@ -121,12 +135,10 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
     const rawQuery = Prisma.sql`
       SELECT DISTINCT ON (${Prisma.raw(distinctColumn)})
-        m.id,
+       m.id,
         m.text,
         m.created,
         m."dateRead",
-        m."senderId",
-        m."recipientId",
         s."userId" as "senderUserId",
         s.name as "senderName",
         s.image as "senderImage",
@@ -151,27 +163,23 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
       LIMIT ${limit + 1};
     `;
 
-    const rawThreads = await prisma.$queryRaw<any[]>(rawQuery);
+    const rawThreads:ThreadDto[] = await prisma.$queryRaw(rawQuery);
 
-    console.log(`Query returned ${rawThreads.length} threads.`);
-
-    // Map each raw row to the desired thread and message DTO format
     const threads = rawThreads.slice(0, limit).map(row => {
       const lastMessage: MessageDto = {
         id: row.id,
         text: row.text,
         created: row.created,
         dateRead: row.dateRead,
-        senderId: row.senderUserId,
+        senderId: row.senderId,
         senderName: row.senderName,
         senderImage: row.senderImage,
-        recipientId: row.recipientUserId,
+        recipientId: row.recipientId,
         recipientName: row.recipientName,
         recipientImage: row.recipientImage,
       };
       
       return {
-        // Use your map function to convert the message data
         lastMessage,
         unreadCount: Number(row.unreadCount) || 0,
       };
@@ -179,7 +187,7 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
 
     let nextCursor: string | undefined;
     if (rawThreads.length > limit) {
-      nextCursor = rawThreads[rawThreads.length - 1].created.toISOString();
+      nextCursor = rawThreads[rawThreads.length - 1].created;
     }
 
     return { threads, nextCursor };

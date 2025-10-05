@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientMessage } from "@/types";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import clsx from "clsx";
 import { timeAgo } from "@/lib/utils";
 import PresenceAvatar from "@/components/PresenceAvatar";

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageDto, Thread } from "@/types";
+import { Thread } from "@/types";
 import React, { useEffect, useRef } from "react";
 import MessageTableCell from "./MessageTableCell";
 import { useMessages } from "@/hooks/useMessages";

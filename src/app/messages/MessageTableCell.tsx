@@ -1,9 +1,9 @@
 import PresenceAvatar from "@/components/PresenceAvatar";
 import { truncateString } from "@/lib/utils";
 import { MessageDto } from "@/types";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import React from "react";
-import { AiFillDelete } from "react-icons/ai";
+// import { AiFillDelete } from "react-icons/ai";
 
 type Props = {
   item: MessageDto;
@@ -18,8 +18,8 @@ export default function MessageTableCell({
   item,
   columnKey,
   isOutbox,
-  deleteMessage,
-  isDeleting,
+  // deleteMessage,
+  // isDeleting,
   unreadCount, // <-- Add this line
 }: Props) {
   const cellValue = item[columnKey as keyof MessageDto];
