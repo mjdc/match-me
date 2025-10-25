@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Session } from "next-auth";
 
 const DynamicHeartAnimation = dynamic(() => import("@/components/animations/HeartAnimation"), { ssr: false });
 const DynamicAnimatedBackground = dynamic(() => import("@/components/animations/AnimatedBackground"), { ssr: false });
@@ -10,7 +11,7 @@ const DynamicAnimatedStats = dynamic(() => import("@/components/animations/Anima
 const DynamicAnimatedFeatures = dynamic(() => import("@/components/animations/AnimatedFeatures"), { ssr: false });
 
 type Props = {
-  session: any;
+  session: Session | null;
 };
 
 export default function HomeClient({ session }: Props) {
