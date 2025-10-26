@@ -139,10 +139,10 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
         m.text,
         m.created,
         m."dateRead",
-        s."userId" as "senderUserId",
+        s."userId" as "senderId",
         s.name as "senderName",
         s.image as "senderImage",
-        r."userId" as "recipientUserId",
+        r."userId" as "recipientId",
         r.name as "recipientName",
         r.image as "recipientImage",
         (
@@ -189,7 +189,7 @@ export async function getMessagesByContainer(container?: string | null, cursor?:
     if (rawThreads.length > limit) {
       nextCursor = rawThreads[rawThreads.length - 1].created;
     }
-
+   
     return { threads, nextCursor };
   } catch (error) {
     console.log(error);

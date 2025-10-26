@@ -95,13 +95,15 @@ export const useMessages = (
     [isOutbox, remove, updateUnreadCount]
   );
 
-  const handleRowSelect = (key: Key) => {
-    const message = messages.find(
-      (m) => m.id === key
-    );
-    const url = isOutbox
-      ? `/members/${message?.recipientId}`
-      : `/members/${message?.senderId}`;
+  const handleRowSelect = (key?: string) => {
+    // const message = messages.find(
+    //   (m) => m.id === key
+    // );
+    // const url = isOutbox
+    //   ? `/members/${message?.recipientId}`
+    //   : `/members/${message?.senderId}`;
+    console.log('le', key)
+    const url = `/members/${key}`;
     router.push(url + "/chat");
   };
 
