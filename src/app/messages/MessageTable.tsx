@@ -100,7 +100,7 @@ export default function MessageTable({
                     <TableRow
                       key={item.id}
                       className="cursor-pointer"
-                      onClick={() => selectRow(item.id)}
+                      onClick={() => selectRow(isOutbox ? item.recipientId : item.senderId)}
                     >
                       {columns.map((col) => (
                         <TableCell

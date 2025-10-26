@@ -102,7 +102,6 @@ export const useMessages = (
     // const url = isOutbox
     //   ? `/members/${message?.recipientId}`
     //   : `/members/${message?.senderId}`;
-    console.log('le', key)
     const url = `/members/${key}`;
     router.push(url + "/chat");
   };
