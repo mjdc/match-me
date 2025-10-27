@@ -47,12 +47,12 @@ export default function MessageSidebar() {
   );
 
   return (
-    <div className="flex flex-col shadow-md rounded-lg cursor-pointer overflow-hidden">
+    <div className="flex flex-row md:flex-col shadow-md rounded-lg cursor-pointer overflow-hidden">
       {items.map(({ key, icon: Icon, label, badge }) => (
         <div
           key={key}
           className={clsx(
-            "flex flex-row items-center gap-2 p-3 transition-colors",
+            "flex flex-row items-center gap-2 p-3 transition-colors w-1/2 md:w-full",
             {
               "bg-muted text-primary font-semibold": selected === key,
               "hover:bg-muted/50": selected !== key,
