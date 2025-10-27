@@ -29,12 +29,12 @@ export default async function Layout({
   const likeIds = await fetchCurrentUserLikeIds();
 
   return (
-    <div className="grid grid-cols-12 gap-5 h-[80vh] min-h-[48rem]">
-      <div className="col-span-3">
+    <div className="grid grid-cols-12 md:gap-5 h-[75vh] md:h[80vh] min-h-[48rem] px-3 md:px-0">
+      <div className="col-span-12 md:col-span-3 z-2 relative">
         <MemberSidebar member={member} navLinks={navLinks} hasLiked={likeIds.includes(member.userId)} />
       </div>
-      <div className="col-span-9">
-        <Card className="w-full mt-10 h-[80vh] min-h-[48rem] flex flex-col">
+      <div className="col-span-12 md:col-span-9">
+        <Card className="w-full -mt-20 md:mt-10 h-[75vh] md:h[80vh] min-h-[48rem] flex flex-col">
           {children}
         </Card>
       </div>

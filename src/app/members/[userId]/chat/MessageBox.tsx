@@ -28,7 +28,7 @@ export default function MessageBox({ message, currentUserId }: Props) {
   );
 
   const messageContentClasses = clsx(
-    "flex flex-col w-[50%] px-2 py-1",
+    "flex flex-col md:w-[50%] px-2 py-1",
     {
       "rounded-l-xl rounded-tr-xl text-white bg-blue-100": isCurrentUserSender,
       "rounded-r-xl rounded-tl-xl border-gray-200 bg-green-100": !isCurrentUserSender,
@@ -43,7 +43,7 @@ export default function MessageBox({ message, currentUserId }: Props) {
         <div></div>
       )}
       <div className="flex">
-        <span className="text-sm font-semibold text-gray-900">{message.senderName}</span>
+        <span className="text-sm font-semibold text-gray-900 hidden md:block">{message.senderName}</span>
         <span className="text-sm text-gray-500 ml-2">{message.created}</span>
       </div>
     </div>

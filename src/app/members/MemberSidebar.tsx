@@ -23,15 +23,15 @@ export default function MemberSidebar({ member, navLinks, hasLiked }: Props) {
 
 
   return (
-    <Card className="w-full mt-10 h-[80vh] min-h-[48rem] flex flex-col items-center">
-      <div className="mt-6 w-50 h-50 relative">
+    <Card className="w-full mt-5 md:mt-10 md:h-[80vh] md:min-h-[48rem] flex flex-row md:flex-col items-center rounded-b-none rounded-t-lg md:rounded-xl md:.shadow-sm shadow-none py-3 md:py-6">
+      <div className="mt-6 w-18 h-18 md:w-32 md:h-32 lg:w-50 lg:h-50 relative">
         <Image
           src={member.image || "/images/user.png"}
           alt="User profile main image"
           fill
           className="object-cover rounded-full p-2 overflow-hidden"
         />
-        <div className="absolute top-3 right-3 z-50">
+        <div className="absolute top-[-5px] right-[-5px] md:top-3 md:right-3 z-50">
           {typeof hasLiked !== "undefined" && (
             <LikeButton
               targetId={member.userId}
@@ -41,9 +41,9 @@ export default function MemberSidebar({ member, navLinks, hasLiked }: Props) {
         </div>
       </div>
 
-      <CardContent className="flex flex-col items-center mt-4 px-6 text-center overflow-hidden">
+      <CardContent className="flex w-[calc(100%-4.5rem)] flex-col md:items-center md:mt-4 px-2 md:px-6 md:text-center overflow-hidden">
         <div className="flex">
-          <div className="text-2xl">
+          <div className="md:text-2xl">
             {member.name},{" "}
             {calculateAge(member.dateOfBirth)}
           </div>
@@ -51,18 +51,18 @@ export default function MemberSidebar({ member, navLinks, hasLiked }: Props) {
             <PresenceDot member={member} />
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs md:text-sm text-muted-foreground">
           {member.city}, {member.country}
         </div>
 
-        <Separator className="my-4 w-full" />
+        <Separator className="my-3 md:my-4 w-full" />
 
-        <nav className="flex flex-col text-lg gap-4 w-full">
+        <nav className="flex flex-row md:flex-col md:text-lg gap-3 md:gap-4 w-full">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className={`rounded px-2 py-1 text-center transition-colors ${
+              className={`rounded md:px-2 py-1 text-center transition-colors ${
                 pathname === link.href
                   ? "text-primary font-medium"
                   : "text-muted-foreground hover:text-primary"
@@ -74,7 +74,7 @@ export default function MemberSidebar({ member, navLinks, hasLiked }: Props) {
         </nav>
       </CardContent>
 
-      <CardFooter className="mt-auto w-full px-6 pb-6">
+      <CardFooter className="mt-auto w-full px-6 pb-6 hidden md:block">
         <Button asChild variant="outline" className="w-full">
           <Link href="/members">Go back</Link>
         </Button>

@@ -24,7 +24,7 @@ export default function CardInnerWrapper({ header, body, footer }: Props) {
         )}
       </CardHeader>
       <Separator className="my-0" />
-      <CardContent className="overflow-scroll">{body}</CardContent>
+      <CardContent className="overflow-scroll px-0 md:px-6">{body}</CardContent>
 
       {footer && <CardFooter className="mt-auto">{footer}</CardFooter>}
     </>

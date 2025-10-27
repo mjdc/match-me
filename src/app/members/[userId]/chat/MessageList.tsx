@@ -135,7 +135,7 @@ export default function MessageList({
       ) : (
         <div
           ref={containerRef}
-          className="flex flex-col-reverse overflow-y-auto h-[600px]"
+          className="flex flex-col-reverse overflow-y-auto h-[600px] px-6"
         >
           <div ref={bottomRef} />
           {messages.map((message) => (
